@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from sklearn.preprocessing import MinMaxScaler
+import datetime as dt
+import requests
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -106,8 +108,17 @@ def format_volume(num):
     return str(int(num))
 
 def safe_download(ticker: str, start, end):
-    """Robust yfinance download with fallback period=max"""
+    """Robust yfinance download for cloud deploy (fallback history())"""
     try:
+        # Pastikan end <= hari ini (biar ga aneh di server)
+        today = pd.Timestamp.today().normalize()
+        end = pd.Timestamp(end)
+        if end > today:
+            end = today + pd.Timedelta(days=1)
+
+        start = pd.Timestamp(start)
+
+        # ---- Method 1: yf.download ----
         df = yf.download(
             ticker,
             start=start,
@@ -117,18 +128,22 @@ def safe_download(ticker: str, start, end):
             actions=False,
             threads=False,
         )
+
+        # kalau kosong, lanjut fallback
         if df is None or df.empty:
-            df = yf.download(
-                ticker,
-                period="max",
-                progress=False,
-                auto_adjust=False,
-                actions=False,
-                threads=False,
-            )
+            # ---- Method 2: history() (sering lebih tembus) ----
+            tk = yf.Ticker(ticker)
+            df = tk.history(start=start, end=end, auto_adjust=False, actions=False)
+
+        # kalau masih kosong, coba period max
+        if df is None or df.empty:
+            tk = yf.Ticker(ticker)
+            df = tk.history(period="max", auto_adjust=False, actions=False)
+
         if df is None or df.empty:
             return None
 
+        # rapihin kolom multiindex
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
@@ -143,6 +158,7 @@ def safe_download(ticker: str, start, end):
         df = df.sort_index()
         df = df[~df.index.duplicated(keep="last")]
         return df
+
     except Exception:
         return None
 
