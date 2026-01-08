@@ -25,7 +25,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 # =========================
 # 1) PAGE CONFIG (HARUS SEKALI DI ATAS)
 # =========================
-st.set_page_config(page_title="AI Stock Sniper", page_icon="🦅", layout="wide")
+st.set_page_config(page_title="PREDIKSI SAHAM", page_icon="🦅", layout="wide")
 
 # =========================
 # 2) GLOBAL CSS
