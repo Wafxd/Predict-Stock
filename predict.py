@@ -162,7 +162,7 @@ def safe_download(ticker: str, start, end):
     except Exception:
         return None
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=6*60*60)  # 6 jam biar gak sering hit Yahoo
 def get_stock_data(ticker, start, end):
     df = safe_download(ticker, start, end)
     if df is None or df.empty:
@@ -179,6 +179,7 @@ def get_stock_data(ticker, start, end):
 
     df["USD_IDR"] = fx["Close"].reindex(df.index).ffill()
     return df
+
 
 def volume_dominance(df: pd.DataFrame, lookback: int = 5):
     """Proxy buy vs sell volume based on candle color (green=buy, red=sell)."""
