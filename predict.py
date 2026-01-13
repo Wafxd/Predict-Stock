@@ -357,7 +357,13 @@ with tab1:
                 m_s3 = cm2.text_input("Sell 3 ", key="ms3")
 
         with right:
-            st.markdown("⚙️ **PARAMETER MODEL & CHART**")
+            st.markdown(
+                """
+                <div class="right-card">
+                    <div class="right-card-title">⚙️ <b>PARAMETER MODEL & CHART</b></div>
+                """,
+                unsafe_allow_html=True
+            )
             c1, c2, c3, c4 = st.columns(4)
             with c1:
                 LOOK_BACK = st.number_input("LOOK_BACK", min_value=20, max_value=120, value=60, step=5)
@@ -820,7 +826,7 @@ with tab2:
 
     c1, c2, c3 = st.columns([1.2, 1.2, 1])
     with c1:
-        lot_size = st.number_input("Ukuran 1 lot (lembar)", min_value=1, max_value=1000, value=100, step=1, key="avg_lot_size")
+        lot_size = st.number_input("Ukuran 1 lot (lembar) DEFAULT", min_value=1, max_value=1000, value=100, step=1, key="avg_lot_size")
     with c2:
         include_fee = st.checkbox("Include fee (opsional)", value=False, key="avg_include_fee")
     with c3:
@@ -886,27 +892,27 @@ with tab2:
         total_add_shares += shares
 
     st.markdown("---")
-    st.markdown("### 3) Hasil")
+    st.markdown("### 3) Hasil Perhitungan Rata-Rata")
 
     total_shares = saham0 + total_add_shares
     total_cost = cost0 + total_add_cost
     avg_new = (total_cost / total_shares) if total_shares > 0 else 0.0
 
     s1, s2, s3, s4 = st.columns(4)
-    s1.metric("Total Lembar", f"{total_shares:,.0f}")
+    # s1.metric("Total Lembar", f"{total_shares:,.0f}")
     s2.metric("Total Lot", f"{(total_shares/lot_size):,.2f}")
     s3.metric("Total Modal", f"{total_cost:,.0f}")
     s4.metric("Rata-rata Baru", f"{avg_new:,.2f}")
 
-    st.markdown(
-        f"""
-        <div class="card" style="margin-top:10px;">
-          <b>Kesimpulan:</b> dari avg awal <b>{avg0:.2f}</b> dengan <b>{lot0:.0f}</b> lot,
-          setelah tambah pembelian, avg kamu jadi <b style="font-size:1.1rem;">{avg_new:.2f}</b>.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # st.markdown(
+    #     f"""
+    #     <div class="card" style="margin-top:10px;">
+    #       <b>Kesimpulan:</b> dari avg awal <b>{avg0:.2f}</b> dengan <b>{lot0:.0f}</b> lot,
+    #       setelah tambah pembelian, avg kamu jadi <b style="font-size:1.1rem;">{avg_new:.2f}</b>.
+    #     </div>
+    #     """,
+    #     unsafe_allow_html=True,
+    # )
 
     st.markdown("---")
     st.markdown("### 4) Target Harga (Break-even / Profit)")
@@ -945,58 +951,58 @@ with tab2:
         st.metric("Selisih vs Avg", f"{dist_to_be:,.2f}")
 
     st.markdown("---")
-    st.markdown("### 5) Mode Ledger (Opsional)")
-    st.caption("Kalau kamu mau catat transaksi BUY/SELL berkali-kali. Metode: average cost.")
-    use_ledger = st.checkbox("Aktifkan mode ledger", value=False, key="avg_use_ledger")
+    # st.markdown("### 5) Mode Ledger (Opsional)")
+    # st.caption("Kalau kamu mau catat transaksi BUY/SELL berkali-kali. Metode: average cost.")
+    # use_ledger = st.checkbox("Aktifkan mode ledger", value=False, key="avg_use_ledger")
 
-    if use_ledger:
-        if "ledger" not in st.session_state:
-            st.session_state.ledger = pd.DataFrame(
-                [{"Tanggal": pd.Timestamp.today().date(), "Aksi": "BUY", "Harga": 150.0, "Lot": 10.0}],
-                columns=["Tanggal", "Aksi", "Harga", "Lot"],
-            )
+    # if use_ledger:
+    #     if "ledger" not in st.session_state:
+    #         st.session_state.ledger = pd.DataFrame(
+    #             [{"Tanggal": pd.Timestamp.today().date(), "Aksi": "BUY", "Harga": 150.0, "Lot": 10.0}],
+    #             columns=["Tanggal", "Aksi", "Harga", "Lot"],
+    #         )
 
-        edited = st.data_editor(
-            st.session_state.ledger,
-            num_rows="dynamic",
-            use_container_width=True,
-            column_config={
-                "Aksi": st.column_config.SelectboxColumn("Aksi", options=["BUY", "SELL"]),
-                "Harga": st.column_config.NumberColumn("Harga", min_value=0.0, step=1.0),
-                "Lot": st.column_config.NumberColumn("Lot", min_value=0.0, step=1.0),
-            },
-            key="avg_ledger_editor",
-        )
-        st.session_state.ledger = edited
+    #     edited = st.data_editor(
+    #         st.session_state.ledger,
+    #         num_rows="dynamic",
+    #         use_container_width=True,
+    #         column_config={
+    #             "Aksi": st.column_config.SelectboxColumn("Aksi", options=["BUY", "SELL"]),
+    #             "Harga": st.column_config.NumberColumn("Harga", min_value=0.0, step=1.0),
+    #             "Lot": st.column_config.NumberColumn("Lot", min_value=0.0, step=1.0),
+    #         },
+    #         key="avg_ledger_editor",
+    #     )
+    #     st.session_state.ledger = edited
 
-        shares = 0.0
-        cost = 0.0
-        for _, r in edited.iterrows():
-            aksi = str(r["Aksi"]).upper().strip()
-            harga = float(r["Harga"]) if np.isfinite(r["Harga"]) else 0.0
-            lot = float(r["Lot"]) if np.isfinite(r["Lot"]) else 0.0
-            qty = lot * lot_size
+    #     shares = 0.0
+    #     cost = 0.0
+    #     for _, r in edited.iterrows():
+    #         aksi = str(r["Aksi"]).upper().strip()
+    #         harga = float(r["Harga"]) if np.isfinite(r["Harga"]) else 0.0
+    #         lot = float(r["Lot"]) if np.isfinite(r["Lot"]) else 0.0
+    #         qty = lot * lot_size
 
-            if aksi == "BUY":
-                add_cost = harga * qty
-                if include_fee and fee_pct > 0:
-                    add_cost *= (1 + fee_pct / 100)
-                cost += add_cost
-                shares += qty
+    #         if aksi == "BUY":
+    #             add_cost = harga * qty
+    #             if include_fee and fee_pct > 0:
+    #                 add_cost *= (1 + fee_pct / 100)
+    #             cost += add_cost
+    #             shares += qty
 
-            elif aksi == "SELL":
-                if shares <= 0:
-                    continue
-                avg_now = cost / shares if shares > 0 else 0.0
-                sell_qty = min(qty, shares)
-                cost -= avg_now * sell_qty
-                shares -= sell_qty
+    #         elif aksi == "SELL":
+    #             if shares <= 0:
+    #                 continue
+    #             avg_now = cost / shares if shares > 0 else 0.0
+    #             sell_qty = min(qty, shares)
+    #             cost -= avg_now * sell_qty
+    #             shares -= sell_qty
 
-        avg_ledger = cost / shares if shares > 0 else 0.0
+    #     avg_ledger = cost / shares if shares > 0 else 0.0
 
-        st.markdown("#### Ringkasan Ledger")
-        k1, k2, k3 = st.columns(3)
-        k1.metric("Sisa Lot", f"{shares/lot_size:,.2f}")
-        k2.metric("Rata-rata (ledger)", f"{avg_ledger:,.2f}")
-        k3.metric("Modal tersisa (avg cost)", f"{cost:,.0f}")
+    #     st.markdown("#### Ringkasan Ledger")
+    #     k1, k2, k3 = st.columns(3)
+    #     k1.metric("Sisa Lot", f"{shares/lot_size:,.2f}")
+    #     k2.metric("Rata-rata (ledger)", f"{avg_ledger:,.2f}")
+    #     k3.metric("Modal tersisa (avg cost)", f"{cost:,.0f}")
 
